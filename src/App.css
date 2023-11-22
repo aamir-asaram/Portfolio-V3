@@ -1,0 +1,34 @@
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+html * {
+  overflow-x: hidden;
+}
+
+#landing {
+  --tw-bg-opacity: 1;
+  color: #1db954;
+}
+
+#landing:hover {
+  text-decoration: underline;
+  cursor: default;
+}
+
+#menu a {
+  width: fit-content;
+  font-size: 1.5rem;
+}
+
+#menu a:hover {
+  cursor:pointer;
+  --tw-bg-opacity: 1;
+  color: rgb(216 180 254 / var(--tw-bg-opacity));
+}
+
+.active {
+  --tw-bg-opacity: 1;
+  color: #1db954;
+}

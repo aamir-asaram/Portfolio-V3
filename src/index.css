@@ -1,0 +1,27 @@
+@import url('https://fonts.cdnfonts.com/css/univers-next-pro');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+.univers {
+  font-family: 'Univers Next Pro', sans-serif;
+  /* decrease character spacing */
+  letter-spacing: -0.03em;
+}
+
+.univers:hover {
+  text-decoration: underline;
+  -webkit-text-stroke-width: 3px;
+  -webkit-text-stroke-color: black;
+  color: transparent;
+  cursor: default;
+}
+
+.about-me {
+  color: #6C7299;
+}
