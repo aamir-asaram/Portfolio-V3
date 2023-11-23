@@ -1,5 +1,7 @@
 import { motion, useTransform, useScroll } from "framer-motion";
 import { useRef } from "react";
+import cnc from "./assets/cnc.png";
+import me from "./assets/me.png";
 
 const Projects = () => {
   return (
@@ -30,7 +32,7 @@ const HorizontalScrollCarousel = () => {
   );
 };
 
-const Card = ({ card }: { card: { url: string; title: string; id: number; live: string, source: string; description: string } }) => {
+const Card = ({ card }: { card: { url: any; title: string; id: number; live: string, source: string; description: string } }) => {
   return (
     <div
       key={card.id}
@@ -67,7 +69,7 @@ export default Projects;
 
 const cards = [
   {
-    url: "/src/assets/me.png",
+    url: { me },
     title: "Centsible",
     id: 1,
     description: "",
@@ -83,7 +85,7 @@ const cards = [
     live: "",
   },
   {
-    url: "/src/assets/cnc.png",
+    url: { cnc },
     title: "Code & Coffee",
     id: 3,
     description: "A showcase site for a local coffee event",
