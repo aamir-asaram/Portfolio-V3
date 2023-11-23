@@ -8,16 +8,16 @@ const NavBar = () => {
     const about = document.getElementById('goto-about');
     const projects = document.getElementById('goto-projects');
     // const contact = document.getElementById('goto-contact');
-    if (currentScrollPos < about.offsetTop) {
+    if (about && currentScrollPos < about.offsetTop) {
       setActive('home');
-    } else if (currentScrollPos < projects.offsetTop - 2) {
+    } else if (about && projects && currentScrollPos < projects.offsetTop - 2) {
       setActive('about');
-    } else if (currentScrollPos >= (projects.offsetTop - 1)) {
+    } else if (projects && currentScrollPos >= (projects.offsetTop - 1)) {
       setActive('projects');
     } else {
       setActive('contact');
     }
-    console.log(`currentScrollPos: ${currentScrollPos} | about.offsetTop: ${about.offsetTop} | projects.offsetTop: ${projects.offsetTop}}`);
+    console.log(`currentScrollPos: ${currentScrollPos} | about.offsetTop: ${about?.offsetTop} | projects.offsetTop: ${projects?.offsetTop}`);
   };
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -26,7 +26,7 @@ const NavBar = () => {
 
   const scrollTo = (id:any) => {
     const element = document.getElementById(id);
-    element.scrollIntoView({
+    element?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     });
