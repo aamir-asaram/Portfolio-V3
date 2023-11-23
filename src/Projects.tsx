@@ -67,7 +67,7 @@ export default Projects;
 
 const cards = [
   {
-    url: "./assets/me.png",
+    url: "/src/assets/me.png",
     title: "Centsible",
     id: 1,
     description: "",
@@ -83,7 +83,7 @@ const cards = [
     live: "",
   },
   {
-    url: "./assets/cnc.png",
+    url: "/src/assets/cnc.png",
     title: "Code & Coffee",
     id: 3,
     description: "A showcase site for a local coffee event",
