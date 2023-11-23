@@ -5,7 +5,7 @@ import me from "./assets/me.png";
 
 const Projects = () => {
   return (
-    <div className="bg-neutral-800">
+    <div id="goto-projects" className="bg-neutral-800">
       <HorizontalScrollCarousel />
     </div>
   );

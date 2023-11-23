@@ -6,7 +6,7 @@ const About = () => {
   ];
 
   return (
-    <div className="relative z-50 flex flex-col md:flex-row lg:flex-row flex-wrap justify-around items-center text-white bg-black rounded-xl pt-[15%] pb-[10%] lg:py-[5%]">
+    <div id="goto-about" className="relative z-50 flex flex-col md:flex-row lg:flex-row flex-wrap justify-around items-center text-white bg-black rounded-xl pt-[15%] pb-[10%] lg:py-[5%]">
       <h2 className="pl-10 lg:pl-[6%] w-full text-3xl font-semibold">About me</h2>
       <p className="w-4/5 lg:w-2/5 text-xl">
         <span className="about-me">My name is Aamir</span> and I am a full-stack web developer with a passion for bridging the gap between the imagination and reality using code. I like building things <span className="about-me">from scratch.</span>
