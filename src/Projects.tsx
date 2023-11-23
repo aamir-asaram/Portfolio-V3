@@ -44,7 +44,7 @@ const Card = ({ card }: { card: { url: string; title: string; id: number; live: 
         }}
         className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-110"
       >
-        <div className="absolute inset-0 z-10 grid place-content-center w-full h-full bg-gradient-to-br from-white/20 to-white/0 group-hover:bg-primary/30 group-hover:backdrop-blur-xl">
+        <div className="absolute inset-0 z-10 place-content-center w-full h-full bg-gradient-to-br from-white/20 to-white/0 hidden group-hover:grid group-hover:bg-primary/30 group-hover:backdrop-blur-xl">
           <p className="p-8 text-6xl font-black uppercase text-transparent group-hover:text-black w-full h-full">
             {card.title}
           </p>
