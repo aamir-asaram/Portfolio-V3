@@ -69,7 +69,7 @@ export default Projects;
 
 const cards = [
   {
-    url: { me },
+    url: "/static/images/me.png",
     title: "Centsible",
     id: 1,
     description: "",
@@ -85,7 +85,7 @@ const cards = [
     live: "",
   },
   {
-    url: { cnc },
+    url: "/static/images/cnc.png",
     title: "Code & Coffee",
     id: 3,
     description: "A showcase site for a local coffee event",
