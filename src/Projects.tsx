@@ -1,7 +1,5 @@
 import { motion, useTransform, useScroll } from "framer-motion";
 import { useRef } from "react";
-import cnc from "./assets/cnc.png";
-import me from "./assets/me.png";
 
 const Projects = () => {
   return (
