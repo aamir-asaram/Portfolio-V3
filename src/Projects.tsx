@@ -1,7 +1,5 @@
 import { motion, useTransform, useScroll } from "framer-motion";
 import { useRef } from "react";
-import cnc from "./assets/cnc.png";
-import me from "./assets/me.png";
 
 const Projects = () => {
   return (
@@ -69,7 +67,7 @@ export default Projects;
 
 const cards = [
   {
-    url: { me },
+    url: "./assets/cnc.png",
     title: "Centsible",
     id: 1,
     description: "",
@@ -85,7 +83,7 @@ const cards = [
     live: "",
   },
   {
-    url: { cnc },
+    url: "./assets/cnc.png",
     title: "Code & Coffee",
     id: 3,
     description: "A showcase site for a local coffee event",
