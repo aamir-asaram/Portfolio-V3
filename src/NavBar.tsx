@@ -17,7 +17,6 @@ const NavBar = () => {
     } else {
       setActive('contact');
     }
-    console.log(`currentScrollPos: ${currentScrollPos} | about.offsetTop: ${about?.offsetTop} | projects.offsetTop: ${projects?.offsetTop}`);
   };
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
