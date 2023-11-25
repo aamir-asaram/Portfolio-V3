@@ -67,7 +67,7 @@ export default Projects;
 
 const cards = [
   {
-    url: "/static/images/me.png",
+    url: "/static/images/centsible.png",
     title: "Centsible",
     id: 1,
     description: "",
@@ -75,7 +75,7 @@ const cards = [
     live: "",
   },
   {
-    url: "/imgs/abstract/2.jpg",
+    url: "/static/images/drive.png",
     title: "DriveShare",
     id: 2,
     description: "",
@@ -91,24 +91,24 @@ const cards = [
     live: "https://aamir-asaram.github.io/capstone-one/",
   },
   {
-    url: "/imgs/abstract/4.jpg",
-    title: "Title 4",
+    url: "/static/images/power/png",
+    title: "Power Outage Tracker",
     id: 4,
     description: "",
     source: "",
     live: "",
   },
   {
-    url: "/imgs/abstract/5.jpg",
-    title: "Title 5",
+    url: "/static/images/meal.png",
+    title: "Meal Gallery",
     id: 5,
     description: "",
     source: "",
     live: "",
   },
   {
-    url: "/imgs/abstract/6.jpg",
-    title: "Title 6",
+    url: "/static/images/math.png",
+    title: "Math Magicians",
     id: 6,
     description: "",
     source: "",
