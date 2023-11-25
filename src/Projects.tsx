@@ -39,8 +39,9 @@ const Card = ({ card }: { card: { url: any; title: string; id: number; live: str
       <div
         style={{
           backgroundImage: `url(${card.url})`,
-          backgroundSize: "cover",
+          backgroundSize: "contain",
           backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
         className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-110"
       >
@@ -48,7 +49,7 @@ const Card = ({ card }: { card: { url: any; title: string; id: number; live: str
           <p className="p-8 text-6xl font-black uppercase text-transparent group-hover:text-black w-full h-full">
             {card.title}
           </p>
-          <p className="pl-8">
+          <p className="ml-2 pl-8 w-10/12">
             {card.description}
           </p>
           <div className="p-8 hidden group-hover:block">
@@ -70,56 +71,57 @@ const cards = [
     url: "/static/images/centsible.png",
     title: "Centsible",
     id: 1,
-    description: "",
-    source: "",
+    description: "A budgeting app that helps you track your expenses and savings. Built using Rails and TailwindCSS",
+    source: "https://github.com/aamir-asaram/centsible",
     live: "",
   },
   {
     url: "/static/images/drive.png",
     title: "DriveShare",
     id: 2,
-    description: "",
-    source: "",
-    live: "",
+    description: "An AirBnB-like app for renting cars. Built using React, TailwindCSS and Rails",
+    source: "https://github.com/Zohra-Neda/DriveShare-Back-End",
+    live: "https://drive-share-app-frontend.onrender.com/",
   },
   {
     url: "/static/images/cnc.png",
     title: "Code & Coffee",
     id: 3,
-    description: "A showcase site for a local coffee event",
-    source: "",
+    description: "A showcase site for a local coffee event. Built using HTML, CSS and JS",
+    source: "https://github.com/aamir-asaram/capstone-one",
     live: "https://aamir-asaram.github.io/capstone-one/",
   },
   {
-    url: "/static/images/power/png",
+    url: "/static/images/power.png",
     title: "Power Outage Tracker",
     id: 4,
-    description: "",
-    source: "",
-    live: "",
+    description: "A mobile app that tracks power outages across South Africa. Built using React",
+    source: "https://github.com/aamir-asaram/power-outage-tracker",
+    live: "https://power-outage-tracker-qzsq.onrender.com/",
   },
   {
     url: "/static/images/meal.png",
     title: "Meal Gallery",
     id: 5,
-    description: "",
-    source: "",
-    live: "",
+    description: "A gallery of meals from around the world. Built using HTML and JavaScript",
+    source: "https://github.com/HtetWaiYan7191/meal-gallery",
+    live: "https://htetwaiyan7191.github.io/meal-gallery/dist",
+  },
+  {
+    url: "/static/images/space.png",
+    title: "Space Travellers' Hub",
+    id: 6,
+    description: "An app that displays all SpaceX missions and Rockets. Built using React, Redux and JS",
+    source: "https://github.com/Kgomotso196/Space-Travelers",
+    live: "https://space-travelers-hub-i4jc.onrender.com/",
   },
   {
     url: "/static/images/math.png",
     title: "Math Magicians",
-    id: 6,
-    description: "",
-    source: "",
-    live: "",
-  },
-  {
-    url: "/imgs/abstract/7.jpg",
-    title: "Title 7",
     id: 7,
-    description: "",
-    source: "",
+    description: "A calculator app that performs basic arithmetic operations. Built using React and JS",
+    source: "https://github.com/aamir-asaram/math-magicians",
     live: "",
   },
+
 ];
