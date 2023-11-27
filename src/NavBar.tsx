@@ -7,16 +7,16 @@ const NavBar = () => {
     const currentScrollPos = scrollY;
     const about = document.getElementById('goto-about');
     const projects = document.getElementById('goto-projects');
-    // const contact = document.getElementById('goto-contact');
     if (about && currentScrollPos < about.offsetTop) {
       setActive('home');
     } else if (about && projects && currentScrollPos < projects.offsetTop - 2) {
       setActive('about');
-    } else if (projects && currentScrollPos >= (projects.offsetTop - 1)) {
+    } else if (projects && currentScrollPos < (projects.offsetTop + projects.offsetHeight - 2)) {
       setActive('projects');
     } else {
       setActive('contact');
     }
+    console.log(`${scrollY} ${about?.offsetTop} ${projects?.offsetTop} ${projects?.offsetHeight}`)
   };
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -31,6 +31,15 @@ const NavBar = () => {
     });
   };
 
+  const scrollToContact = () => {
+    const projects = document.getElementById('goto-projects');
+    const pos = projects ? projects.offsetTop + projects.offsetHeight : 0;
+    window.scrollTo({
+      top: pos,
+      behavior: 'smooth',
+    });
+  }
+
   return (
     <nav className="fixed top-0 z-[100000] w-full">
       <ul className="flex justify-around items-center text-white bg-black/50 backdrop-blur-xl p-4">
@@ -43,7 +52,7 @@ const NavBar = () => {
         <li className="cursor-pointer" onClick={() => scrollTo('goto-projects')}>
           <span className={active === 'projects' ? 'text-primary' : ''}>Projects</span>
         </li>
-        <li className="cursor-pointer" onClick={() => scrollTo('goto-contact')}>
+        <li className="cursor-pointer" onClick={() => scrollToContact()}>
           <span className={active === 'contact' ? 'text-primary' : ''}>Contact</span>
         </li>
       </ul>

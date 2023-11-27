@@ -2,6 +2,7 @@ import NavBar from './NavBar'
 import About from './About'
 import Landing from './Landing'
 import Projects from './Projects'
+import Contact from './Contact'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Landing />
       <About />
       <Projects />
+      <Contact />
     </>
   )
 }
