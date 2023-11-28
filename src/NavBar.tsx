@@ -25,7 +25,6 @@ const NavBar = () => {
     } else {
       setActive('contact');
     }
-    console.log(`${scrollY} ${about?.offsetTop} ${projects?.offsetTop} ${projects?.offsetHeight}`)
   };
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
