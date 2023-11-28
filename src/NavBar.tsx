@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
 
+export const scrollToContact = () => {
+  const projects = document.getElementById('goto-projects');
+  const pos = projects ? projects.offsetTop + projects.offsetHeight : 0;
+  window.scrollTo({
+    top: pos,
+    behavior: 'smooth',
+  });
+}
+
 const NavBar = () => {
   // check where the user is on the page and highlight the appropriate nav item
   const [active, setActive] = useState('home');
@@ -30,15 +39,6 @@ const NavBar = () => {
       block: 'start',
     });
   };
-
-  const scrollToContact = () => {
-    const projects = document.getElementById('goto-projects');
-    const pos = projects ? projects.offsetTop + projects.offsetHeight : 0;
-    window.scrollTo({
-      top: pos,
-      behavior: 'smooth',
-    });
-  }
 
   return (
     <nav className="fixed top-0 z-[100000] w-full">
