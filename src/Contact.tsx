@@ -18,7 +18,7 @@ const Contact = () => {
           </form>
         </div>
         <div className="w-10/12 flex flex-col items-center">
-          <h2 className="text-2xl lg:text-3xl pt-10 mb-10 font-medium">Or connect with me:</h2>
+          <h2 className="text-2xl lg:text-3xl pt-10 -mt-10 mb-10 font-medium">Or connect with me:</h2>
           <div className="flex justify-center lg:relative fixed bottom-8 bg-black/50 text-white py-3 rounded-full z-[1000000]">
             <a href="https://github.com/aamir-asaram" target="_blank" rel="noopener noreferrer">
               <FontAwesomeIcon icon={faGithub} className="text-2xl lg:text-4xl mx-5 hover:scale-110"></FontAwesomeIcon>
