@@ -55,7 +55,7 @@ const Card = ({ card }: { card: { url: any; title: string; id: number; live: str
           <div className="p-8 hidden group-hover:block">
             {/* if card.live != "" render button */}
             { card.live && <a className="bg-primary px-4 py-2 rounded-full hover:bg-primary/50 mr-2" href={card.live} target="_blank">View Live</a>}
-            <a className="bg-primary px-4 py-2 rounded-full hover:bg-primary/50 mx-2 cursor-pointer">View Source</a>
+            <a className="bg-primary px-4 py-2 rounded-full hover:bg-primary/50 mx-2 cursor-pointer" href={card.source} target="_blank">View Source</a>
           </div>
         </div>
       </div>
