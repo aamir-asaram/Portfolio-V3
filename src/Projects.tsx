@@ -67,18 +67,11 @@ const Card = ({ card }: { card: { url: any; title: string; id: number; live: str
 export default Projects;
 
 const cards = [
-  {
-    url: "/static/images/centsible.png",
-    title: "Centsible",
-    id: 1,
-    description: "A budgeting app that helps you track your expenses and savings. Built using Rails and TailwindCSS",
-    source: "https://github.com/aamir-asaram/centsible",
-    live: "",
-  },
+
   {
     url: "/static/images/drive.png",
     title: "DriveShare",
-    id: 2,
+    id: 1,
     description: "An AirBnB-like app for renting cars. Built using React, TailwindCSS and Rails",
     source: "https://github.com/Zohra-Neda/DriveShare-Back-End",
     live: "https://drive-share-app-frontend.onrender.com/",
@@ -86,10 +79,18 @@ const cards = [
   {
     url: "/static/images/cnc.png",
     title: "Code & Coffee",
-    id: 3,
+    id: 2,
     description: "A showcase site for a local coffee event. Built using HTML, CSS and JS",
     source: "https://github.com/aamir-asaram/capstone-one",
     live: "https://aamir-asaram.github.io/capstone-one/",
+  },
+  {
+    url: "/static/images/centsible.png",
+    title: "Centsible",
+    id: 3,
+    description: "A budgeting app that helps you track your expenses and savings. Built using Rails and TailwindCSS",
+    source: "https://github.com/aamir-asaram/centsible",
+    live: "https://centsible-wiq6.onrender.com",
   },
   {
     url: "/static/images/power.png",
