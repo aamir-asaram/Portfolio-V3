@@ -42,16 +42,16 @@ const NavBar = () => {
   return (
     <nav className="fixed top-0 z-[100000] w-full">
       <ul className="flex justify-around items-center text-white bg-black/50 backdrop-blur-xl p-4">
-        <li className="cursor-pointer" onClick={() => scrollTo('goto-home')}>
+        <li className="cursor-pointer hover:scale-110" onClick={() => scrollTo('goto-home')}>
           <span className={active === 'home' ? 'text-primary' : ''}>Home</span>
         </li>
-        <li className="cursor-pointer" onClick={() => scrollTo('goto-about')}>
+        <li className="cursor-pointer hover:scale-110" onClick={() => scrollTo('goto-about')}>
           <span className={active === 'about' ? 'text-primary' : ''}>About</span>
         </li>
-        <li className="cursor-pointer" onClick={() => scrollTo('goto-projects')}>
+        <li className="cursor-pointer hover:scale-110" onClick={() => scrollTo('goto-projects')}>
           <span className={active === 'projects' ? 'text-primary' : ''}>Projects</span>
         </li>
-        <li className="cursor-pointer" onClick={() => scrollToContact()}>
+        <li className="cursor-pointer hover:scale-110" onClick={() => scrollToContact()}>
           <span className={active === 'contact' ? 'text-primary' : ''}>Contact</span>
         </li>
       </ul>
