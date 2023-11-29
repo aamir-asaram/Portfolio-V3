@@ -121,7 +121,7 @@ const cards = [
     id: 7,
     description: "A calculator app that performs basic arithmetic operations. Built using React and JS",
     source: "https://github.com/aamir-asaram/math-magicians",
-    live: "",
+    live: "https://vercel.com/aamir-asaram/math-magicians/6rFL4umGXyE8yHHXZCNT8WG6E9fe",
   },
 
 ];
