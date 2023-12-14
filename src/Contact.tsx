@@ -23,7 +23,7 @@ const Contact = () => {
       </div>
       <div className="bg-black p-6 rounded-xl flex flex-col items-center justify-center text-white h-fit py-8 w-10/12 lg:w-1/2">
         <h2 className="text-2xl lg:text-3xl mb-4 font-medium">Leave me a message:</h2>
-        <form id="contact-form" onSubmit={handleSubmit} className="flex flex-col w-full text-black">
+        <form id="contact-form" action="https://formspree.io/f/moqoqzez" method="POST" onSubmit={handleSubmit} className="flex flex-col w-full text-black">
           <input type="text" name="Name" id="" placeholder="Name" className="my-2 p-2 w-full text-black" required value={name} onChange={(e) => setName(e.target.value)} />
           <input type="email" name="Email" id="" placeholder="Email" className="my-2 p-2 w-full text-black" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <textarea name="Message" id="" placeholder="Message" className="my-2 p-2 w-full text-black" required value={message} onChange={(e) => setMessage(e.target.value)}></textarea>
