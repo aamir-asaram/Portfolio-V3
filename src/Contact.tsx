@@ -10,7 +10,7 @@ const Contact = () => {
         </div>
         <div className="bg-black p-6 rounded-xl flex flex-col items-center justify-center text-white h-fit py-8 w-10/12 lg:w-1/2">
           <h2 className="text-2xl lg:text-3xl mb-4 font-medium">Leave me a message:</h2>
-          <form action="https://formspree.io/f/mdorkqqb" method="POST" className="flex flex-col w-full text-black">
+          <form action="https://formspree.io/f/moqoqzez" method="POST" className="flex flex-col w-full text-black">
             <input type="text" name="Name" id="" placeholder="Name" className="my-2 p-2 w-full text-black" required />
             <input type="email" name="Email" id="" placeholder="Email" className="my-2 p-2 w-full text-black" required />
             <textarea name="Message" id="" placeholder="Message" className="my-2 p-2 w-full text-black" required ></textarea>

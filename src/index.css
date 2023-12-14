@@ -25,3 +25,17 @@ html {
 .about-me {
   color: #6C7299;
 }
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.bg-gradient-to-r {
+  animation: gradientAnimation 3s linear infinite;
+}
+
