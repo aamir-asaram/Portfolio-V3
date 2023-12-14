@@ -10,8 +10,6 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Perform form submission logic here
-
     // Clear form input values
     setName("");
     setEmail("");
