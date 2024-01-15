@@ -1,4 +1,5 @@
 import { scrollToContact } from "./NavBar";
+import { NavLink } from "react-router-dom";
 
 const About = () => {
   const mySkills = [
@@ -23,7 +24,9 @@ const About = () => {
           ))}
         </ul>
       </div>
-      <button className="bg-primary text-black text-2xl font-semibold w-4/5 lg:w-1/5 py-2 rounded-lg mt-4" onClick={scrollToContact}>VIEW MY CERTIFICATES</button>
+      <NavLink to={"/certificates"} className="hover:bg-primaryHover hover:scale-110 text-center bg-primary text-black text-2xl font-semibold w-4/5 lg:w-1/5 py-2 rounded-lg mt-4">
+        VIEW MY CERTIFICATES
+      </NavLink>
     </div>
   );
 }

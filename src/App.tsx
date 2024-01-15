@@ -1,18 +1,16 @@
 import NavBar from './NavBar'
-import About from './About'
-import Landing from './Landing'
-import Projects from './Projects'
-import Contact from './Contact'
+import Home from './Home'
+import { Routes, Route, BrowserRouter as Router } from 'react-router-dom'
+import Certificates from './Certificates'
 
 function App() {
   return (
-    <>
-      <NavBar />
-      <Landing />
-      <About />
-      <Projects />
-      <Contact />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home/>}></Route>
+        <Route path="/certificates" element={<Certificates/>}></Route>
+      </Routes>
+    </Router>
   )
 }
 
