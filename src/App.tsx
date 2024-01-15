@@ -1,4 +1,3 @@
-import NavBar from './NavBar'
 import Home from './Home'
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom'
 import Certificates from './Certificates'
