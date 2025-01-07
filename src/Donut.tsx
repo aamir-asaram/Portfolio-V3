@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-const Certificates = () => {
+const Donut = () => {
   return (
     <div className="flex flex-col items-center justify-center bg-black text-primary">
       <h1 className="text-5xl font-semibold mt-8 mb-4">Certificates</h1>
