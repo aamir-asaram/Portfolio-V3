@@ -20,7 +20,7 @@ const Certificates = () => {
   );
 }
 
-export default Certificates;
+export default Donut;
 
 const certificates = [
   "/static/images/Certificate/html.JPG",
