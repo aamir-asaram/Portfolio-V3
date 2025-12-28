@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jeopardy (TXT Import + Daily Double)</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      :root { --j-blue: #0b1a6a; --j-gold: #f5c84c; }
+      body { background: radial-gradient(1100px 700px at 50% 0%, #142a99 0%, var(--j-blue) 45%, #07114a 100%); }
+      .j-card { box-shadow: 0 14px 35px rgba(0,0,0,.35); }
+      .j-press { transform: translateY(0); }
+      .j-press:active { transform: translateY(2px); }
+    </style>
+  </head>
+
+  <body class="min-h-screen text-white antialiased">
+    <div id="app" class="min-h-screen"></div>
+
+    <script>
+      const VALUES = [200, 400, 600, 800, 1000];
+      const app = document.getElementById("app");
+
+      function mkDefaultClues(catName) {
+        const clues = {};
+        VALUES.forEach(v => {
+          clues[v] = { q: `Sample question (${v}) for ${catName}`, a: "Sample answer", used: false, isDailyDouble: false };
+        });
+        return clues;
+      }
+
+      const DEFAULT_GAME = [
+        { name: "Category 1", clues: mkDefaultClues("Category 1") },
+        { name: "Category 2", clues: mkDefaultClues("Category 2") },
+        { name: "Category 3", clues: mkDefaultClues("Category 3") },
+        { name: "Category 4", clues: mkDefaultClues("Category 4") },
+        { name: "Category 5", clues: mkDefaultClues("Category 5") },
+        { name: "Category 6", clues: mkDefaultClues("Category 6") },
+      ];
+
+      const state = {
+        step: "setup", // setup | intro | board
+        teamCount: 3,
+        teams: [],
+        game: deepClone(DEFAULT_GAME),
+
+        active: null,          // { catIndex, value }
+        reveal: false,
+        scoreDelta: 200,
+
+        importStatus: null,
+
+        // Daily Double UI gate
+        dailyDoublePick: null, // { catIndex, value }
+        dailyDoubleArmed: false,   // chosen for this round
+        dailyDoubleSplash: false,  // show splash before clue
+        dailyDoubleConsumed: false // only once per game
+      };
+
+      function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+      function money(n) { return "$" + Number(n).toLocaleString("en-US"); }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+      function escapeAttr(str) {
+        return String(str).replaceAll('"', "%22").replaceAll("'", "%27");
+      }
+
+      function safeRender() {
+        try { render(); }
+        catch (err) {
+          app.innerHTML = `
+            <div class="max-w-3xl mx-auto p-6">
+              <div class="rounded-2xl bg-red-500/10 border border-red-500/30 p-5">
+                <div class="font-extrabold text-lg">Render error</div>
+                <pre class="mt-3 text-sm text-white/80">${escapeHtml(err?.stack || String(err))}</pre>
+              </div>
+            </div>
+          `;
+          console.error(err);
+        }
+      }
+
+      function initTeams(count) {
+        state.teams = Array.from({ length: count }, (_, i) => ({ name: `Team ${i + 1}`, score: 0 }));
+      }
+
+      function applySetupFromForm() {
+        const count = Number(document.getElementById("teamCount").value);
+        state.teamCount = count;
+        if (!state.teams.length || state.teams.length !== count) initTeams(count);
+
+        for (let i = 0; i < count; i++) {
+          const input = document.getElementById(`teamName_${i}`);
+          if (input) state.teams[i].name = input.value.trim() || `Team ${i + 1}`;
+        }
+
+        for (let i = 0; i < 6; i++) {
+          const input = document.getElementById(`catName_${i}`);
+          if (input) state.game[i].name = input.value.trim() || `Category ${i + 1}`;
+        }
+      }
+
+      function resetUsedAndDailyDoubleFlags() {
+        state.game.forEach(cat => {
+          VALUES.forEach(v => {
+            cat.clues[v].used = false;
+            cat.clues[v].isDailyDouble = false;
+          });
+        });
+      }
+
+      function pickDailyDouble() {
+        // pick from all 30 clues
+        const all = [];
+        for (let c = 0; c < 6; c++) for (const v of VALUES) all.push({ catIndex: c, value: v });
+        const choice = all[Math.floor(Math.random() * all.length)];
+        state.dailyDoublePick = choice;
+        state.dailyDoubleArmed = true;
+        state.dailyDoubleConsumed = false;
+
+        state.game[choice.catIndex].clues[choice.value].isDailyDouble = true;
+      }
+
+      function startGame() {
+        applySetupFromForm();
+        resetUsedAndDailyDoubleFlags();
+        state.active = null;
+        state.reveal = false;
+        state.scoreDelta = 200;
+
+        state.dailyDoubleSplash = false;
+        state.dailyDoublePick = null;
+        state.dailyDoubleArmed = false;
+        state.dailyDoubleConsumed = false;
+        pickDailyDouble();
+
+        state.step = "intro";
+        safeRender();
+      }
+
+      function openClue(catIndex, value) {
+        const clue = state.game[catIndex].clues[value];
+        if (clue.used) return;
+
+        state.active = { catIndex, value };
+        state.reveal = false;
+        state.scoreDelta = value;
+
+        // Daily Double splash gate
+        if (clue.isDailyDouble && !state.dailyDoubleConsumed) {
+          state.dailyDoubleSplash = true;
+        } else {
+          state.dailyDoubleSplash = false;
+        }
+
+        safeRender();
+      }
+
+      function continueFromDailyDoubleSplash() {
+        state.dailyDoubleSplash = false;
+        state.dailyDoubleConsumed = true;
+        safeRender();
+      }
+
+      function closeClue(markUsed = true) {
+        if (state.active && markUsed) {
+          const { catIndex, value } = state.active;
+          state.game[catIndex].clues[value].used = true;
+        }
+        state.active = null;
+        state.reveal = false;
+        state.scoreDelta = 200;
+        state.dailyDoubleSplash = false;
+        safeRender();
+      }
+
+      function adjustScore(teamIndex, direction) {
+        const delta = state.scoreDelta || 200;
+        state.teams[teamIndex].score += direction * delta;
+        safeRender();
+      }
+
+      function resetEverything() {
+        state.step = "setup";
+        state.teamCount = 3;
+        state.teams = [];
+        state.game = deepClone(DEFAULT_GAME);
+
+        state.active = null;
+        state.reveal = false;
+        state.scoreDelta = 200;
+
+        state.importStatus = null;
+
+        state.dailyDoublePick = null;
+        state.dailyDoubleArmed = false;
+        state.dailyDoubleSplash = false;
+        state.dailyDoubleConsumed = false;
+
+        safeRender();
+      }
+
+      // --- TXT IMPORT (c1/q1/a1 format) ---
+      function parseJeopardyTxt(text) {
+        const lines = String(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+
+        const cats = [];
+        let currentCat = null;
+        let lastField = null;
+
+        const catRe = /^c(\d+)\s*:\s*(.+)\s*$/i;
+        const qRe   = /^q(\d+)\s*:\s*(.*)\s*$/i;
+        const aRe   = /^a(\d+)\s*:\s*(.*)\s*$/i;
+
+        function ensureCat(idx, name) {
+          while (cats.length <= idx) cats.push({ name: `Category ${cats.length + 1}`, qa: {} });
+          cats[idx].name = name || cats[idx].name;
+          return cats[idx];
+        }
+
+        function normalizeText(s) {
+          return String(s ?? "").replace(/\\n/g, "\n").trim();
+        }
+
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line) continue;
+
+          let m;
+          if ((m = line.match(catRe))) {
+            const idx = Math.max(0, Number(m[1]) - 1);
+            currentCat = ensureCat(idx, m[2]);
+            lastField = null;
+            continue;
+          }
+          if ((m = line.match(qRe))) {
+            const n = Number(m[1]);
+            if (!currentCat) currentCat = ensureCat(0, "Category 1");
+            currentCat.qa[n] ||= { q: "", a: "" };
+            currentCat.qa[n].q = normalizeText(m[2]);
+            lastField = { kind: "q", n };
+            continue;
+          }
+          if ((m = line.match(aRe))) {
+            const n = Number(m[1]);
+            if (!currentCat) currentCat = ensureCat(0, "Category 1");
+            currentCat.qa[n] ||= { q: "", a: "" };
+            currentCat.qa[n].a = normalizeText(m[2]);
+            lastField = { kind: "a", n };
+            continue;
+          }
+
+          if (currentCat && lastField && currentCat.qa[lastField.n]) {
+            const slot = currentCat.qa[lastField.n];
+            if (lastField.kind === "q") slot.q = (slot.q ? slot.q + "\n" : "") + normalizeText(line);
+            if (lastField.kind === "a") slot.a = (slot.a ? slot.a + "\n" : "") + normalizeText(line);
+          }
+        }
+
+        const game = [];
+        for (let i = 0; i < 6; i++) {
+          const src = cats[i] || { name: `Category ${i + 1}`, qa: {} };
+          const clues = {};
+          for (let n = 1; n <= 5; n++) {
+            const value = VALUES[n - 1];
+            const q = src.qa[n]?.q ?? `Question for ${money(value)}`;
+            const a = src.qa[n]?.a ?? `Answer for ${money(value)}`;
+            clues[value] = { q, a, used: false, isDailyDouble: false };
+          }
+          game.push({ name: src.name || `Category ${i + 1}`, clues });
+        }
+        return game;
+      }
+
+      async function importTxtFile(file) {
+        if (!file) return;
+        const text = await file.text();
+        state.game = parseJeopardyTxt(text);
+        state.importStatus = `Imported: ${file.name}`;
+
+        // When importing, re-pick daily double for the new set
+        resetUsedAndDailyDoubleFlags();
+        state.dailyDoublePick = null;
+        state.dailyDoubleArmed = false;
+        state.dailyDoubleConsumed = false;
+        pickDailyDouble();
+
+        safeRender();
+      }
+
+      function renderQuestion(q) {
+        const trimmed = String(q || "").trim();
+
+        // Not a URL → normal text
+        if (!/^https?:\/\//i.test(trimmed)) {
+          return `<div class="whitespace-pre-wrap">${escapeHtml(trimmed)}</div>`;
+        }
+
+        // URL clue → attempt image; if image fails, show a button (no URL text)
+        const safeUrl = escapeAttr(trimmed);
+        const btnId = "showImageBtn";
+
+        return `
+          <div class="flex flex-col items-center gap-4">
+            <img
+              id="clueImg"
+              src="${safeUrl}"
+              alt="Clue image"
+              class="max-h-[52vh] w-auto rounded-2xl border border-white/15 bg-black/30 object-contain"
+            />
+            <button
+              id="${btnId}"
+              class="hidden j-press px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-semibold"
+              type="button"
+            >
+              Show image
+            </button>
+          </div>
+        `;
+      }
+
+      function render() {
+        if (state.step === "setup") return renderSetup();
+        if (state.step === "intro") return renderIntro();
+        return renderBoard();
+      }
+
+      function renderSetup() {
+        if (!state.teams.length) initTeams(state.teamCount);
+
+        app.innerHTML = `
+          <div class="max-w-5xl mx-auto px-4 py-10">
+            <div class="j-card rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 md:p-8">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Jeopardy</h1>
+                  <p class="text-white/70 mt-2">Import a .txt file, pick teams (3–6), then start.</p>
+                </div>
+                <button class="j-press px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm" id="resetBtn" type="button">
+                  Reset
+                </button>
+              </div>
+
+              <div class="mt-6 rounded-2xl bg-black/20 border border-white/10 p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <div class="text-sm font-semibold text-white/80">Import questions (.txt)</div>
+                    <div class="text-white/60 text-sm">Drag & drop your file here, or choose a file.</div>
+                  </div>
+
+                  <input id="fileInput" type="file" accept=".txt,text/plain"
+                    class="block text-sm text-white/70
+                           file:mr-3 file:rounded-xl file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-white file:font-semibold
+                           hover:file:bg-white/15"
+                  />
+                </div>
+
+                <div id="dropZone" class="mt-4 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-white/70">
+                  Drop .txt file here
+                  ${state.importStatus ? `<div class="mt-2 text-xs text-[color:var(--j-gold)] font-extrabold">${escapeHtml(state.importStatus)}</div>` : ""}
+                </div>
+
+                <div class="mt-4 text-xs text-white/55">
+                  Format: <span class="font-mono">c1:</span> category, then <span class="font-mono">q1:</span>/<span class="font-mono">a1:</span> … <span class="font-mono">q5:</span>/<span class="font-mono">a5:</span>.
+                </div>
+              </div>
+
+              <div class="mt-8 grid md:grid-cols-2 gap-6">
+                <div class="rounded-2xl bg-black/20 border border-white/10 p-5">
+                  <label class="block text-sm font-semibold text-white/80">Number of teams</label>
+                  <div class="mt-2 flex items-center gap-3">
+                    <select id="teamCount" class="w-full rounded-xl bg-white/10 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/30">
+                      ${[3,4,5,6].map(n => `<option value="${n}" ${state.teamCount===n?"selected":""}>${n}</option>`).join("")}
+                    </select>
+                    <button id="applyTeams" class="j-press shrink-0 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm">Apply</button>
+                  </div>
+
+                  <div class="mt-5 space-y-3">
+                    <div class="text-xs uppercase tracking-widest text-white/50">Team names</div>
+                    ${Array.from({length: state.teamCount}).map((_, i) => `
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center font-bold text-white/80">${i+1}</div>
+                        <input id="teamName_${i}" value="${escapeHtml(state.teams[i]?.name || `Team ${i+1}`)}"
+                          class="w-full rounded-xl bg-white/10 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/30"
+                          placeholder="Team name" />
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+
+                <div class="rounded-2xl bg-black/20 border border-white/10 p-5">
+                  <div class="flex items-center justify-between gap-4">
+                    <div>
+                      <div class="text-sm font-semibold text-white/80">Categories</div>
+                      <div class="text-white/60 text-sm">Auto-filled when you import a txt file.</div>
+                    </div>
+                    <div class="text-xs text-white/50">${VALUES.map(v => money(v)).join(" · ")}</div>
+                  </div>
+
+                  <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    ${Array.from({length: 6}).map((_, i) => `
+                      <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                        <label class="block text-xs uppercase tracking-widest text-white/50">Category ${i+1}</label>
+                        <input id="catName_${i}" value="${escapeHtml(state.game[i]?.name || `Category ${i+1}`)}"
+                          class="mt-2 w-full rounded-xl bg-white/10 border border-white/10 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/30"
+                          placeholder="Category name" />
+                      </div>
+                    `).join("")}
+                  </div>
+
+                  <div class="mt-6 flex items-center justify-end gap-3">
+                    <button id="startBtn" class="j-press px-5 py-2.5 rounded-xl bg-[color:var(--j-gold)] text-black font-extrabold hover:brightness-110">
+                      Start game
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById("resetBtn").onclick = resetEverything;
+
+        document.getElementById("applyTeams").onclick = () => {
+          const count = Number(document.getElementById("teamCount").value);
+          state.teamCount = count;
+          initTeams(count);
+          safeRender();
+        };
+
+        document.getElementById("startBtn").onclick = startGame;
+
+        document.getElementById("fileInput").addEventListener("change", (e) => {
+          const file = e.target.files?.[0];
+          importTxtFile(file).catch(err => {
+            state.importStatus = "Import failed: " + (err?.message || String(err));
+            safeRender();
+          });
+        });
+
+        const dz = document.getElementById("dropZone");
+        dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("bg-white/10"); });
+        dz.addEventListener("dragleave", () => dz.classList.remove("bg-white/10"));
+        dz.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dz.classList.remove("bg-white/10");
+          const file = e.dataTransfer?.files?.[0];
+          importTxtFile(file).catch(err => {
+            state.importStatus = "Import failed: " + (err?.message || String(err));
+            safeRender();
+          });
+        });
+      }
+
+      function renderIntro() {
+        app.innerHTML = `
+          <div class="max-w-6xl mx-auto px-4 py-10">
+            <div class="j-card rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-6 md:p-8">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h2 class="text-2xl md:text-3xl font-extrabold">Categories</h2>
+                  <p class="text-white/70 mt-2">Here are your six categories for this game.</p>
+                </div>
+                <button id="toBoard" class="j-press px-5 py-2.5 rounded-xl bg-[color:var(--j-gold)] text-black font-extrabold hover:brightness-110">
+                  Continue
+                </button>
+              </div>
+
+              <div class="mt-7 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                ${state.game.map((cat, i) => `
+                  <div class="rounded-2xl bg-black/25 border border-white/10 p-5">
+                    <div class="text-xs uppercase tracking-[0.22em] text-white/50">Category ${i+1}</div>
+                    <div class="mt-2 text-xl font-extrabold leading-tight">${escapeHtml(cat.name)}</div>
+                    <div class="mt-4 text-white/50 text-sm">${VALUES.map(v => money(v)).join(" · ")}</div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById("toBoard").onclick = () => { state.step = "board"; safeRender(); };
+      }
+
+      function renderBoard() {
+        const activeClue = state.active
+          ? state.game[state.active.catIndex].clues[state.active.value]
+          : null;
+
+        app.innerHTML = `
+          <div class="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+            <div class="j-card rounded-2xl bg-white/5 backdrop-blur border border-white/10 p-4 sm:p-5">
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <div class="text-xs uppercase tracking-[0.22em] text-white/50">Jeopardy</div>
+                    <div class="text-lg sm:text-xl font-extrabold">Scoreboard</div>
+                  </div>
+                  <div class="text-sm text-white/70">
+                    +/- uses: <span class="font-extrabold text-white">${money(state.scoreDelta || 200)}</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  ${state.teams.map((t, idx) => `
+                    <div class="rounded-2xl bg-black/25 border border-white/10 px-4 py-3 flex items-center gap-3">
+                      <div>
+                        <div class="text-sm font-bold leading-tight">${escapeHtml(t.name)}</div>
+                        <div class="text-[color:var(--j-gold)] font-extrabold text-lg">${money(t.score)}</div>
+                      </div>
+                      <div class="flex flex-col gap-2">
+                        <button data-team="${idx}" data-dir="1"
+                          class="j-press w-10 h-10 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-extrabold text-lg leading-none">+</button>
+                        <button data-team="${idx}" data-dir="-1"
+                          class="j-press w-10 h-10 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-extrabold text-lg leading-none">–</button>
+                      </div>
+                    </div>
+                  `).join("")}
+
+                  <div class="flex items-center gap-2">
+                    <button id="newGame" class="j-press px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm font-semibold">
+                      New game
+                    </button>
+                    <button id="backToSetup" class="j-press px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm font-semibold">
+                      Setup
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 sm:mt-6 grid grid-cols-6 gap-2 sm:gap-3">
+              ${state.game.map((cat, catIndex) => `
+                <div class="rounded-2xl bg-black/25 border border-white/10 overflow-hidden">
+                  <div class="px-2 py-3 sm:py-4 text-center font-extrabold uppercase tracking-wide text-sm sm:text-base bg-white/5">
+                    ${escapeHtml(cat.name)}
+                  </div>
+
+                  <div class="grid grid-rows-5">
+                    ${VALUES.map(value => {
+                      const clue = cat.clues[value];
+                      const used = !!clue.used;
+                      const dd = clue.isDailyDouble && !state.dailyDoubleConsumed;
+                      return `
+                        <button
+                          class="j-press h-16 sm:h-20 md:h-24 border-t border-white/10 flex items-center justify-center font-extrabold text-xl sm:text-2xl
+                                 ${used ? "text-white/25 cursor-not-allowed" : "text-[color:var(--j-gold)] hover:bg-white/5"}"
+                          ${used ? "disabled" : ""}
+                          data-cat="${catIndex}"
+                          data-value="${value}"
+                          title="${dd ? "Daily Double!" : ""}"
+                        >
+                          ${money(value)}
+                        </button>
+                      `;
+                    }).join("")}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+
+            ${state.active ? renderModal(activeClue) : ""}
+          </div>
+        `;
+
+        // Grid buttons
+        document.querySelectorAll("[data-cat][data-value]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            openClue(Number(btn.getAttribute("data-cat")), Number(btn.getAttribute("data-value")));
+          });
+        });
+
+        // Score buttons (top bar)
+        document.querySelectorAll("[data-team][data-dir]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            adjustScore(Number(btn.getAttribute("data-team")), Number(btn.getAttribute("data-dir")));
+          });
+        });
+
+        // Top controls
+        document.getElementById("newGame").onclick = () => {
+          state.teams.forEach(t => (t.score = 0));
+          resetUsedAndDailyDoubleFlags();
+          state.active = null;
+          state.reveal = false;
+          state.scoreDelta = 200;
+
+          state.dailyDoubleSplash = false;
+          state.dailyDoublePick = null;
+          state.dailyDoubleArmed = false;
+          state.dailyDoubleConsumed = false;
+          pickDailyDouble();
+
+          safeRender();
+        };
+        document.getElementById("backToSetup").onclick = () => { state.step = "setup"; safeRender(); };
+
+        // Modal wiring (only when active)
+        if (state.active) {
+          const closeBtn = document.getElementById("closeClue");
+          if (closeBtn) closeBtn.onclick = () => closeClue(true);
+
+          const overlay = document.getElementById("modalOverlay");
+          if (overlay) overlay.onclick = () => closeClue(true);
+
+          const revealBtn = document.getElementById("revealBtn");
+          if (revealBtn) revealBtn.onclick = () => { state.reveal = !state.reveal; safeRender(); };
+
+          const ddContinue = document.getElementById("ddContinue");
+          if (ddContinue) ddContinue.onclick = continueFromDailyDoubleSplash;
+
+          // Modal score buttons
+          document.querySelectorAll("[data-mteam][data-mdir]").forEach(btn => {
+            btn.addEventListener("click", () => {
+              adjustScore(Number(btn.getAttribute("data-mteam")), Number(btn.getAttribute("data-mdir")));
+            });
+          });
+
+          // Image failure handling (hide img, show "Show image" button)
+          const img = document.getElementById("clueImg");
+          const showBtn = document.getElementById("showImageBtn");
+          if (img && showBtn) {
+            img.addEventListener("error", () => {
+              img.classList.add("hidden");
+              showBtn.classList.remove("hidden");
+            });
+
+            // If it loads, keep button hidden
+            img.addEventListener("load", () => {
+              showBtn.classList.add("hidden");
+            });
+
+            // Clicking "Show image" opens the URL
+            const url = String(activeClue.q || "").trim();
+            showBtn.onclick = () => window.open(url, "_blank", "noopener");
+          }
+        }
+
+        // Esc closes
+        window.onkeydown = (e) => {
+          if (e.key === "Escape" && state.active) closeClue(true);
+        };
+      }
+
+      function renderModal(activeClue) {
+        const { catIndex, value } = state.active;
+        const categoryName = state.game[catIndex].name;
+
+        const isDD = activeClue.isDailyDouble && !state.dailyDoubleConsumed;
+
+        // Daily Double splash screen
+        if (state.dailyDoubleSplash && isDD) {
+          return `
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div id="modalOverlay" class="absolute inset-0 bg-black/75"></div>
+
+              <div class="relative w-full max-w-2xl j-card rounded-2xl bg-[color:var(--j-blue)] border border-white/15 overflow-hidden">
+                <div class="px-6 py-6 bg-white/5 border-b border-white/10 text-center">
+                  <div class="text-xs uppercase tracking-[0.22em] text-white/60">${escapeHtml(categoryName)} · ${money(value)}</div>
+                  <div class="mt-3 text-4xl sm:text-5xl font-extrabold text-[color:var(--j-gold)]">Daily Double</div>
+                  <div class="mt-3 text-white/70">Make it count.</div>
+                </div>
+
+                <div class="px-6 py-6 flex flex-col items-center gap-4">
+                  <button id="ddContinue" class="j-press px-6 py-3 rounded-xl bg-[color:var(--j-gold)] text-black font-extrabold hover:brightness-110">
+                    Continue
+                  </button>
+                  <button id="closeClue" class="j-press px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm font-semibold">
+                    Back to board
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // Normal clue modal (with in-modal scoring)
+        return `
+          <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div id="modalOverlay" class="absolute inset-0 bg-black/70"></div>
+
+            <div class="relative w-full max-w-4xl j-card rounded-2xl bg-[color:var(--j-blue)] border border-white/15 overflow-hidden">
+              <div class="px-5 sm:px-7 py-4 sm:py-5 bg-white/5 border-b border-white/10">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div>
+                    <div class="text-xs uppercase tracking-[0.22em] text-white/60">
+                      ${escapeHtml(categoryName)} · ${money(value)} ${activeClue.isDailyDouble ? `<span class="ml-2 text-[color:var(--j-gold)] font-extrabold">(Daily Double)</span>` : ""}
+                    </div>
+                    <div class="mt-1 text-lg sm:text-xl font-extrabold">Clue</div>
+                  </div>
+
+                  <div class="flex items-center justify-between sm:justify-end gap-3">
+                    <div class="text-sm text-white/70">
+                      +/- uses <span class="font-extrabold text-white">${money(value)}</span>
+                    </div>
+                    <button id="closeClue"
+                      class="j-press px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-sm font-semibold">
+                      Back to board
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="px-5 sm:px-7 py-6 sm:py-8">
+                <div class="text-center text-2xl sm:text-3xl md:text-4xl font-extrabold leading-snug">
+                  ${renderQuestion(activeClue.q)}
+                </div>
+
+                <!-- In-modal scoring -->
+                <div class="mt-7 rounded-2xl bg-black/25 border border-white/10 p-4 sm:p-5">
+                  <div class="text-xs uppercase tracking-[0.22em] text-white/60 text-center">Score this clue</div>
+                  <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    ${state.teams.map((t, idx) => `
+                      <div class="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-between gap-3">
+                        <div>
+                          <div class="font-bold">${escapeHtml(t.name)}</div>
+                          <div class="text-[color:var(--j-gold)] font-extrabold">${money(t.score)}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button data-mteam="${idx}" data-mdir="-1"
+                            class="j-press w-11 h-11 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-extrabold text-lg leading-none">–</button>
+                          <button data-mteam="${idx}" data-mdir="1"
+                            class="j-press w-11 h-11 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 font-extrabold text-lg leading-none">+</button>
+                        </div>
+                      </div>
+                    `).join("")}
+                  </div>
+                </div>
+
+                <div class="mt-6 flex flex-col items-center gap-4">
+                  <button id="revealBtn"
+                    class="j-press px-5 py-2.5 rounded-xl bg-[color:var(--j-gold)] text-black font-extrabold hover:brightness-110">
+                    ${state.reveal ? "Hide answer" : "Reveal answer"}
+                  </button>
+
+                  ${state.reveal ? `
+                    <div class="w-full rounded-2xl bg-black/25 border border-white/10 p-5 sm:p-6">
+                      <div class="text-xs uppercase tracking-[0.22em] text-white/60 text-center">Answer</div>
+                      <div class="mt-2 text-center text-xl sm:text-2xl font-extrabold">
+                        ${escapeHtml(activeClue.a)}
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="text-white/60 text-sm text-center">
+                      Award or deduct points using the buttons above, then return to the board.
+                    </div>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderSetupOrIntroOrBoard() { render(); }
+
+      function renderSetupIntroBoard() { render(); }
+
+      // --- Initial render ---
+      safeRender();
+    </script>
+  </body>
+</html>
