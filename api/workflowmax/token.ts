@@ -32,10 +32,17 @@ export default function WorkflowMaxCallback() {
           body: JSON.stringify({ code, state }),
         })
 
-        const data = await res.json()
+        const raw = await res.text()
+
+        let data: any
+        try {
+          data = JSON.parse(raw)
+        } catch {
+          throw new Error(raw || 'Non-JSON response from server')
+        }
 
         if (!res.ok) {
-          throw new Error(data?.error || 'Token exchange failed')
+          throw new Error(data?.error || data?.message || 'Token exchange failed')
         }
 
         localStorage.setItem('workflowmax_tokens', JSON.stringify(data))
