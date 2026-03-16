@@ -26,7 +26,7 @@ export default function Jobs() {
           throw new Error(data?.message || data?.error || 'Failed to fetch jobs')
         }
 
-        setJobs(data.data ?? [])
+        setJobs(data.workflowmaxResponse?.data ?? [])
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unexpected error')
       } finally {
