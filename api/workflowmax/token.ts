@@ -1,64 +1,61 @@
-import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
-
-export default function WorkflowMaxCallback() {
-  const location = useLocation()
-  const [message, setMessage] = useState('Processing login...')
-
-  useEffect(() => {
-    const run = async () => {
-      const params = new URLSearchParams(location.search)
-      const code = params.get('code')
-      const state = params.get('state')
-      const error = params.get('error')
-      const errorDescription = params.get('error_description')
-
-      if (error) {
-        setMessage(`OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`)
-        return
-      }
-
-      if (!code) {
-        setMessage('No authorization code found in callback URL.')
-        return
-      }
-
-      try {
-        const res = await fetch('/api/workflowmax/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ code, state }),
-        })
-
-        const raw = await res.text()
-
-        let data: any
-        try {
-          data = JSON.parse(raw)
-        } catch {
-          throw new Error(raw || 'Non-JSON response from server')
-        }
-
-        if (!res.ok) {
-          throw new Error(data?.error || data?.message || 'Token exchange failed')
-        }
-
-        localStorage.setItem('workflowmax_tokens', JSON.stringify(data))
-        setMessage('WorkflowMax connected successfully.')
-      } catch (err) {
-        setMessage(err instanceof Error ? err.message : 'Unexpected error')
-      }
+export default async function handler(req: any, res: any) {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' })
     }
 
-    run()
-  }, [location.search])
+    const body =
+      typeof req.body === 'string'
+        ? JSON.parse(req.body)
+        : (req.body ?? {})
 
-  return (
-    <main style={{ padding: '2rem' }}>
-      <h1>WorkflowMax callback</h1>
-      <p>{message}</p>
-    </main>
-  )
+    const code = body.code
+
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ error: 'Missing code' })
+    }
+
+    const clientId = process.env.WORKFLOWMAX_CLIENT_ID
+    const clientSecret = process.env.WORKFLOWMAX_CLIENT_SECRET
+    const redirectUri = process.env.WORKFLOWMAX_REDIRECT_URI
+
+    if (!clientId || !clientSecret || !redirectUri) {
+      return res.status(500).json({
+        error: 'Missing server environment variables',
+        hasClientId: Boolean(clientId),
+        hasClientSecret: Boolean(clientSecret),
+        hasRedirectUri: Boolean(redirectUri),
+      })
+    }
+
+    const tokenRes = await fetch('https://oauth.workflowmax.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        client_secret: clientSecret,
+      }).toString(),
+    })
+
+    const raw = await tokenRes.text()
+
+    let data: any
+    try {
+      data = JSON.parse(raw)
+    } catch {
+      data = { raw }
+    }
+
+    return res.status(tokenRes.status).json(data)
+  } catch (error: any) {
+    return res.status(500).json({
+      error: 'Server error',
+      message: error?.message || 'Unknown error',
+    })
+  }
 }
