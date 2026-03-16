@@ -36,7 +36,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Replace this with the exact v2 jobs endpoint from the docs if needed
-    const apiUrl = 'https://api.workflowmax.com/v2/job-templates?page=1&pageSize=50'
+    const apiUrl = 'https://api.workflowmax.com/v2/jobs?page=1&pageSize=50'
 
     const apiRes = await fetch(apiUrl, {
       method: 'GET',
