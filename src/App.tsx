@@ -2,18 +2,18 @@ import Home from './Home'
 import { Routes, Route, BrowserRouter as Router } from 'react-router-dom'
 import Certificates from './Certificates'
 import Donut from './Donut'
-// import Grid from './Grid'
 import WorkflowMaxCallback from './WorkflowMaxCallback'
+import WorkflowMaxConnect from './WorkflowMaxConnect'
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />}></Route>
-        <Route path="/certificates" element={<Certificates />}></Route>
-        <Route path="/donut" element={<Donut />}></Route>
-        <Route path="/workflowmax/callback" element={<WorkflowMaxCallback />}></Route>
-        {/* <Route path="/grid" element={<Grid />}></Route> */}
+        <Route path="/" element={<Home />} />
+        <Route path="/certificates" element={<Certificates />} />
+        <Route path="/donut" element={<Donut />} />
+        <Route path="/workflowmax-connect" element={<WorkflowMaxConnect />} />
+        <Route path="/workflowmax/callback" element={<WorkflowMaxCallback />} />
       </Routes>
     </Router>
   )
