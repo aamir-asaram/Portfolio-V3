@@ -27,6 +27,7 @@ export default function Jobs() {
         }
 
         setJobs(data.workflowmaxResponse?.data ?? [])
+        console.log('WorkflowMax API response:', data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unexpected error')
       } finally {
