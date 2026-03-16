@@ -4,6 +4,7 @@ import Certificates from './Certificates'
 import Donut from './Donut'
 import WorkflowMaxCallback from './WorkflowMaxCallback'
 import WorkflowMaxConnect from './WorkflowMaxConnect'
+import Jobs from './Jobs'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/donut" element={<Donut />} />
         <Route path="/workflowmax-connect" element={<WorkflowMaxConnect />} />
         <Route path="/workflowmax/callback" element={<WorkflowMaxCallback />} />
+        <Route path="/workflowmax/jobs" element={<Jobs />} />
       </Routes>
     </Router>
   )
