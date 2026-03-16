@@ -24,12 +24,9 @@ export default async function handler(req: any, res: any) {
 
     const jwtPayload = decodeJwtPayload(accessToken)
 
-    const orgId =
-      jwtPayload.org_id ||
-      jwtPayload.organisation_id ||
-      jwtPayload.organization_id ||
-      jwtPayload.account_id ||
-      (Array.isArray(jwtPayload.org_ids) ? jwtPayload.org_ids[0] : undefined)
+    const orgId = Array.isArray(jwtPayload.org_ids)
+      ? jwtPayload.org_ids[0]
+      : undefined
 
     if (!orgId) {
       return res.status(400).json({
@@ -38,11 +35,15 @@ export default async function handler(req: any, res: any) {
       })
     }
 
-    const apiRes = await fetch('https://api.workflowmax.com/job.api/list', {
+    // Replace this with the exact v2 jobs endpoint from the docs if needed
+    const apiUrl = 'https://api.workflowmax.com/v2/job-templates?page=1&pageSize=50'
+
+    const apiRes = await fetch(apiUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        account_id: String(orgId),
+        'account-id': String(orgId),
+        'Content-Type': 'application/json',
         Accept: 'application/json',
       },
     })
