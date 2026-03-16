@@ -27,7 +27,7 @@ export default function Jobs() {
         }
 
         setJobs(data.workflowmaxResponse?.data ?? [])
-        // console.log('WorkflowMax API response:', data)
+        console.log('WorkflowMax API response:', data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unexpected error')
       } finally {
@@ -48,7 +48,7 @@ export default function Jobs() {
         {jobs.map((job) => (
           <li key={job.uuid}>
             <strong>{job.name}</strong><br />
-            <p>{job.description}</p>
+            {/* <p>{job.description}</p> */}
           </li>
         ))}
       </ul>
