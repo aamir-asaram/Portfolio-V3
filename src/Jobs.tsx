@@ -46,7 +46,7 @@ export default function Jobs() {
       <ul>
         {jobs.map((job) => (
           <li key={job.uuid}>
-            <strong>{job.name}</strong>
+            <strong>{job.number || 'N/A'} - {job.name}</strong>
           </li>
         ))}
       </ul>
