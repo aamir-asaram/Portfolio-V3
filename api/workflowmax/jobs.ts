@@ -28,7 +28,8 @@ export default async function handler(req: any, res: any) {
       jwtPayload.org_id ||
       jwtPayload.organisation_id ||
       jwtPayload.organization_id ||
-      jwtPayload.account_id
+      jwtPayload.account_id ||
+      (Array.isArray(jwtPayload.org_ids) ? jwtPayload.org_ids[0] : undefined)
 
     if (!orgId) {
       return res.status(400).json({
@@ -37,7 +38,6 @@ export default async function handler(req: any, res: any) {
       })
     }
 
-    // Best-effort endpoint based on WorkflowMax job list references
     const apiRes = await fetch('https://api.workflowmax.com/job.api/list', {
       method: 'GET',
       headers: {
@@ -58,7 +58,6 @@ export default async function handler(req: any, res: any) {
 
     return res.status(apiRes.status).json({
       orgId,
-      jwtPayload,
       workflowmaxResponse: data,
     })
   } catch (error: any) {
