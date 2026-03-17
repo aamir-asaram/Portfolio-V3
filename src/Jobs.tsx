@@ -21,6 +21,7 @@ export default function Jobs() {
         })
 
         const data = await res.json()
+        console.log('WorkflowMax API response:', data)
 
         if (!res.ok) {
           throw new Error(data?.message || data?.error || 'Failed to fetch jobs')

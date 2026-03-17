@@ -18,7 +18,7 @@ export default function TrelloBoardsPage() {
       try {
         const res = await fetch('/api/trello/boards')
         const data = await res.json()
-
+        console.log('Trello API response:', data)
         if (!res.ok) {
           throw new Error(data?.error || data?.message || 'Failed to fetch Trello boards')
         }
