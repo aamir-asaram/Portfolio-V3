@@ -35,31 +35,60 @@ export default async function handler(req: any, res: any) {
       })
     }
 
-    // Replace this with the exact v2 jobs endpoint from the docs if needed
-    const apiUrl = 'https://api.workflowmax.com/v2/jobs?page=1&pageSize=50'
+    const pageSize = 200
+    let page = 1
+    let total = 0
+    let allJobs: any[] = []
+    let keepGoing = true
 
-    const apiRes = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'account-id': String(orgId),
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-    })
+    while (keepGoing) {
+      const apiUrl = `https://api.workflowmax.com/v2/jobs?page=${page}&pageSize=${pageSize}`
 
-    const raw = await apiRes.text()
+      const apiRes = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'account-id': String(orgId),
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      })
 
-    let data: any
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      data = { raw }
+      const raw = await apiRes.text()
+
+      let data: any
+      try {
+        data = JSON.parse(raw)
+      } catch {
+        data = { raw }
+      }
+
+      if (!apiRes.ok) {
+        return res.status(apiRes.status).json({
+          orgId,
+          workflowmaxResponse: data,
+          failedPage: page,
+        })
+      }
+
+      const pageItems = Array.isArray(data?.data) ? data.data : []
+      total = typeof data?.total === 'number' ? data.total : total
+
+      allJobs = allJobs.concat(pageItems)
+
+      if (pageItems.length < pageSize || (total > 0 && allJobs.length >= total)) {
+        keepGoing = false
+      } else {
+        page += 1
+      }
     }
 
-    return res.status(apiRes.status).json({
+    return res.status(200).json({
       orgId,
-      workflowmaxResponse: data,
+      workflowmaxResponse: {
+        data: allJobs,
+        total,
+      },
     })
   } catch (error: any) {
     return res.status(500).json({
