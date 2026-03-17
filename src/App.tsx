@@ -6,6 +6,7 @@ import WorkflowMaxCallback from './WorkflowMaxCallback'
 import WorkflowMaxConnect from './WorkflowMaxConnect'
 import Jobs from './Jobs'
 import Trello from './Trello'
+import TrelloBoards from './TrelloBoards'
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/workflowmax/callback" element={<WorkflowMaxCallback />} />
         <Route path="/workflowmax/jobs" element={<Jobs />} />
         <Route path="/trello" element={<Trello />} />
+        <Route path="/trello/boards" element={<TrelloBoards />} />
       </Routes>
     </Router>
   )
