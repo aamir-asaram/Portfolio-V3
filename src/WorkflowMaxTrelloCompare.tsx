@@ -29,9 +29,9 @@ type TrelloResponse = {
   cards?: TrelloCard[]
 } | TrelloCard[]
 
-function normalize(value: string) {
-  return value.trim().toLowerCase()
-}
+// function normalize(value: string) {
+//   return value.trim().toLowerCase()
+// }
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
