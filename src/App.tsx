@@ -5,6 +5,8 @@ import Donut from './Donut'
 import WorkflowMaxCallback from './WorkflowMaxCallback'
 import WorkflowMaxConnect from './WorkflowMaxConnect'
 import Jobs from './Jobs'
+import Trello from './Trello'
+
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
         <Route path="/workflowmax-connect" element={<WorkflowMaxConnect />} />
         <Route path="/workflowmax/callback" element={<WorkflowMaxCallback />} />
         <Route path="/workflowmax/jobs" element={<Jobs />} />
+        <Route path="/trello" element={<Trello />} />
       </Routes>
     </Router>
   )
