@@ -6,7 +6,7 @@ export default async function handler(req: any, res: any) {
 
     const apiKey = process.env.TRELLO_API_KEY
     const token = process.env.TRELLO_TOKEN
-    const boardId = LF3ImOMH
+    const boardId = "LF3ImOMH"
 
     if (!apiKey || !token || !boardId) {
       return res.status(500).json({
