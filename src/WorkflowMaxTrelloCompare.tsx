@@ -133,7 +133,7 @@ export default function WorkflowMaxTrelloCompare() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-primary p-8">
+      <main className="min-h-screen bg-white text-black p-8">
         <h1 className="text-4xl font-semibold mb-4">WorkflowMax vs Trello</h1>
         <p>Loading...</p>
       </main>
@@ -142,7 +142,7 @@ export default function WorkflowMaxTrelloCompare() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-black text-primary p-8">
+      <main className="min-h-screen bg-white text-black p-8">
         <h1 className="text-4xl font-semibold mb-4">WorkflowMax vs Trello</h1>
         <p className="text-red-400">{error}</p>
       </main>
@@ -150,7 +150,7 @@ export default function WorkflowMaxTrelloCompare() {
   }
 
   return (
-    <main className="min-h-screen bg-black text-primary p-8">
+    <main className="min-h-screen bg-white text-black p-8">
       <h1 className="text-4xl font-semibold mb-2">WorkflowMax vs Trello</h1>
       <p className="mb-8 text-sm opacity-80">
         WorkflowMax jobs: {jobs.length} · Trello cards: {cards.length}
