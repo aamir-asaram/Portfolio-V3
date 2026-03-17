@@ -7,6 +7,7 @@ import WorkflowMaxConnect from './WorkflowMaxConnect'
 import Jobs from './Jobs'
 import Trello from './trello'
 import TrelloBoards from './TrelloBoards'
+import WorkflowMaxTrelloCompare from './WorkflowMaxTrelloCompare'
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/workflowmax/jobs" element={<Jobs />} />
         <Route path="/trello" element={<Trello />} />
         <Route path="/trello/boards" element={<TrelloBoards />} />
+        <Route path="/workflowmax/trello-compare" element={<WorkflowMaxTrelloCompare />} />
       </Routes>
     </Router>
   )
