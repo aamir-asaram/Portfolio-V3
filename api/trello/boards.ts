@@ -16,7 +16,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const trelloRes = await fetch(
-      `https://api.trello.com/1/members/me/boards?key=${encodeURIComponent(apiKey)}&token=${encodeURIComponent(token)}`,
+      `https://api.trello.com/1/members/me/cards?key=${encodeURIComponent(apiKey)}&token=${encodeURIComponent(token)}`,
       {
         method: 'GET',
         headers: {

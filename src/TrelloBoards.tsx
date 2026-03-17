@@ -51,7 +51,7 @@ export default function TrelloBoardsPage() {
               <br />
               {board.desc ? <p>{board.desc}</p> : null}
               <a href={board.url} target="_blank" rel="noreferrer">
-                Open board
+                Open card
               </a>
             </li>
           ))}
