@@ -5,7 +5,7 @@ import Donut from './Donut'
 import WorkflowMaxCallback from './WorkflowMaxCallback'
 import WorkflowMaxConnect from './WorkflowMaxConnect'
 import Jobs from './Jobs'
-import Trello from './Trello'
+import Trello from './trello'
 import TrelloBoards from './TrelloBoards'
 
 
