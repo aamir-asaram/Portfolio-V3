@@ -94,6 +94,7 @@ export default async function handler(req: any, res: any) {
         return bDate - aDate
       })
       .slice(0, 5)
+    console.log(lastFiveJobs)
 
     return res.status(200).json({
       orgId,
