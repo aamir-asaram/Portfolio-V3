@@ -48,7 +48,7 @@ export default function Jobs() {
       <ul>
         {jobs.map((job) => (
           <li key={job.uuid}>
-            <strong>{job.jobNumber} - {job.name}</strong><br />
+            <strong>{job.jobNumber}</strong> - {job.name} | Priority: {job.priority}<br />
             {/* <p>{job.description}</p> */}
           </li>
         ))}
