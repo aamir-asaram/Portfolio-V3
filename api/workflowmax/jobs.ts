@@ -83,10 +83,23 @@ export default async function handler(req: any, res: any) {
       }
     }
 
+    const lastFiveJobs = allJobs
+      .sort((a, b) => {
+        const aDate = new Date(
+          a?.updatedDate || a?.createdDate || 0
+        ).getTime()
+        const bDate = new Date(
+          b?.updatedDate || b?.createdDate || 0
+        ).getTime()
+        return bDate - aDate
+      })
+      .slice(0, 5)
+
     return res.status(200).json({
       orgId,
       workflowmaxResponse: {
-        data: allJobs,
+        data: lastFiveJobs,
+        count: lastFiveJobs.length,
         total,
       },
     })
