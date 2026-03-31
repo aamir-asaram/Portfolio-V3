@@ -21,7 +21,7 @@ export default function WorkflowMaxConnect() {
   return (
     <main style={{ padding: '2rem' }}>
       <h1>Connect WorkflowMax</h1>
-      <button onClick={connectWorkflowMax}>Connect WorkflowMax</button>
+      <button className="bg-blue-300 text-yellow-300 hover:bg-blue-500 rounded-full px-4 py-2" onClick={connectWorkflowMax}>Connect WorkflowMax</button>
     </main>
   )
 }

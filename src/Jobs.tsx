@@ -15,7 +15,8 @@ export default function Jobs() {
         const refreshToken = tokens.refreshToken || tokens.refresh_token
 
         if (!accessToken) {
-          throw new Error('Missing WorkflowMax access token')
+          window.location.href = '/workflowmax-connect'
+          return
         }
 
         if (!refreshToken) {
