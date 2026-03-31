@@ -23,15 +23,16 @@ type WorkflowMaxResponse = {
   }
   data?: WorkflowMaxJob[]
   total?: number
+  tokens?: {
+    accessToken?: string
+    refreshToken?: string
+    expiresIn?: number
+  }
 }
 
 type TrelloResponse = {
   cards?: TrelloCard[]
 } | TrelloCard[]
-
-// function normalize(value: string) {
-//   return value.trim().toLowerCase()
-// }
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -51,14 +52,24 @@ export default function WorkflowMaxTrelloCompare() {
   useEffect(() => {
     const run = async () => {
       try {
-        const tokens = JSON.parse(localStorage.getItem('workflowmax_tokens') || '{}')
+        const stored = localStorage.getItem('workflowmax_tokens')
+        const tokens = stored ? JSON.parse(stored) : {}
+
+        const accessToken = tokens.accessToken || tokens.access_token
+        const refreshToken = tokens.refreshToken || tokens.refresh_token
+
+        if (!accessToken || !refreshToken) {
+          window.location.href = '/workflowmax-connect'
+          return
+        }
 
         const [jobsRes, cardsRes] = await Promise.all([
           fetch('/api/workflowmax/jobs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              accessToken: tokens.access_token,
+              accessToken,
+              refreshToken,
             }),
           }),
           fetch('/api/trello/cards'),
@@ -80,6 +91,20 @@ export default function WorkflowMaxTrelloCompare() {
             (cardsJson as any)?.error ||
               (cardsJson as any)?.message ||
               'Failed to fetch Trello cards'
+          )
+        }
+
+        if (jobsJson?.tokens?.accessToken && jobsJson?.tokens?.refreshToken) {
+          localStorage.setItem(
+            'workflowmax_tokens',
+            JSON.stringify({
+              accessToken: jobsJson.tokens.accessToken,
+              refreshToken: jobsJson.tokens.refreshToken,
+              expiresIn: jobsJson.tokens.expiresIn ?? null,
+              expiresAt: jobsJson.tokens.expiresIn
+                ? Date.now() + jobsJson.tokens.expiresIn * 1000
+                : null,
+            })
           )
         }
 
