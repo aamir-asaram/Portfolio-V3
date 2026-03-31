@@ -31,13 +31,11 @@ export default async function handler(req: any, res: any) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        Accept: 'application/json',
       },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
-        client_id: clientId,
-        client_secret: clientSecret,
-        scope: 'openid profile email workflowmax offline_access',
       }).toString(),
     })
 
@@ -50,7 +48,21 @@ export default async function handler(req: any, res: any) {
       data = { raw }
     }
 
-    return res.status(tokenRes.status).json(data)
+    if (!tokenRes.ok) {
+      return res.status(tokenRes.status).json({
+        error: 'Token refresh failed',
+        workflowmaxResponse: data,
+      })
+    }
+
+    return res.status(200).json({
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token ?? refreshToken,
+      expiresIn: data.expires_in,
+      tokenType: data.token_type,
+      scope: data.scope,
+      raw: data,
+    })
   } catch (error: any) {
     return res.status(500).json({
       error: 'Server error',
