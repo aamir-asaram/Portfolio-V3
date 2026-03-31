@@ -47,6 +47,7 @@ export default function WorkflowMaxCallback() {
 
         localStorage.setItem('workflowmax_tokens', JSON.stringify(data))
         setMessage('WorkflowMax connected successfully.')
+        window.location.href = '/workflowmax/jobs'
       } catch (err) {
         setMessage(err instanceof Error ? err.message : 'Unexpected error')
       }
